@@ -13,7 +13,8 @@ int main()
 		if (a < b)
 		{
 			b = b - a;
-		}else
+		}
+		else
 		{
 			a = a - b;
 		}
