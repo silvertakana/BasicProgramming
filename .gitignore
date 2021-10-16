@@ -1,4 +1,4 @@
-.vscode/
+.vscode
 compiler.cpp
 compiler.exe
 generator.cpp
