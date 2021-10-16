@@ -1,8 +1,7 @@
-\.vscode
+.vscode/
 compiler.cpp
 compiler.exe
 generator.cpp
 generator.exe
-runger
-baseCode
-\hw4\build\
+baseCode/
+hw4/build/
