@@ -17,33 +17,51 @@ namespace ST
 			}
 			void preOrder(void (*f)(T &, Node<T> &))
 			{
-				f(this->data, *this);
-				if (leftmostchild)
-					leftmostchild->preOrder(f);
-				if (rightsibling)
-					rightsibling->preOrder(f);
-			}
-			void postOrder(void (*f)(T &, Node<T> &))
-			{
-				if (leftmostchild)
-					leftmostchild->postOrder(f);
-				f(this->data, *this);
-				if (rightsibling)
-					rightsibling->postOrder(f);
-			}
-			void inOrder(void (*f)(T &, Node<T> &))
-			{
-				if (leftmostchild)
+				f(data, *this);
+				if (leftmostchild != NULL)
 				{
-					leftmostchild->inOrder(f);
-					f(this->data, *this);
-					if (leftmostchild->leftmostchild){
-						leftmostchild->inOrder(f);
-					}else{
-						f(leftmostchild->data, *leftmostchild);
-						f(this->data, *this);
+					leftmostchild->preOrder(f);
+					Node *temp = leftmostchild->rightsibling;
+					while (temp != NULL)
+					{
+						temp->preOrder(f);
+						temp = temp->rightsibling;
 					}
 				}
+			}
+
+			void inOrder(void (*f)(T &, Node<T> &))
+			{
+				if (leftmostchild == NULL)
+				{
+					f(data, *this);
+				}
+				else
+				{
+					leftmostchild->inOrder(f);
+					f(data, *this);
+					Node *temp = leftmostchild->rightsibling;
+					while (temp != NULL)
+					{
+						temp->inOrder(f);
+						temp = temp->rightsibling;
+					}
+				}
+			}
+
+			void postOrder(void (*f)(T &, Node<T> &))
+			{
+				if (leftmostchild != NULL)
+				{
+					leftmostchild->postOrder(f);
+					Node *temp = leftmostchild->rightsibling;
+					while (temp != NULL)
+					{
+						temp->postOrder(f);
+						temp = temp->rightsibling;
+					}
+				}
+				f(data, *this);
 			}
 		};
 	}
@@ -58,10 +76,10 @@ int main()
 	(tree.leftmostchild->rightsibling->rightsibling = new Node<int>{8})->leftmostchild = new Node<int>{3};
 	tree.preOrder([](int &data, Node<int> &node) //					pre_order
 					  { std::cout << data << std::endl; });
-	// std::cout << "---------------------" << std::endl;
-	// tree.postOrder([](int &data, Node<int> &node) //					post_order
-	// 					{ std::cout << data << std::endl; });
-	// std::cout << "---------------------" << std::endl;
-	// tree.inOrder([](int &data, Node<int> &node) //					post_order
-	// 				 { std::cout << data << std::endl; });
+	std::cout << "---------------------" << std::endl;
+	tree.postOrder([](int &data, Node<int> &node) //					post_order
+						{ std::cout << data << std::endl; });
+	std::cout << "---------------------" << std::endl;
+	tree.inOrder([](int &data, Node<int> &node) //					post_order
+					 { std::cout << data << std::endl; });
 }
