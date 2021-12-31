@@ -61,63 +61,9 @@ bool key(const int& a, const int& b)
 {
 	return a < b;
 }
-
-template<class T>
-struct TreeNode
-{
-	T data;
-	TreeNode* left = nullptr, * right = nullptr;
-	void miror()
-	{
-		if (left) left->miror();
-		if (right) right->miror();
-		std::swap(left, right);
-	}
-	TreeNode* clone() const
-	{
-		TreeNode* newTree = new TreeNode{ *this };
-		if (left)newTree->left = left->clone();
-		if (right)newTree->right = right->clone();
-		return newTree;
-	}
-	void preOrder()
-	{
-		std::cout << data << " ";
-		if (left) left->preOrder();
-		if (right) right->preOrder();
-	}
-	void postOrder()
-	{
-		if (left) left->postOrder();
-		if (right) right->postOrder();
-		std::cout << data << " ";
-	}
-	void inOrder()
-	{
-		if (left) left->inOrder();
-		std::cout << data << " ";
-		if (right) right->inOrder();
-	}
-};
-
 int main()
 {
-	TreeNode<int> root{ 2 };
-	((root.left = new TreeNode<int>{ 7 })->left = new TreeNode<int>{ 2 });
-	((root.left->right = new TreeNode<int>{ 6 })->left = new TreeNode<int>{ 5 });
-	root.left->right->right = new TreeNode<int>{ 11 };
-	((root.right = new TreeNode<int>{ 5 })->right = new TreeNode<int>{ 9 })->left = new TreeNode<int>{ 4 };
+	int arr[]{42,20,17,13,28,14,23,15};
 
-	TreeNode<int>* newTree = root.clone();
-	newTree->miror();
-
-	newTree->postOrder();
-	std::cout << std::endl;
-	root.postOrder();
+	bubbleSort(arr, sizeof(arr)/sizeof(int) , key);
 }
-//int main()
-//{
-//	int arr[]{42,20,17,13,28,14,23,15};
-//
-//	bubbleSort(arr, sizeof(arr)/sizeof(int) , key);
-//}
