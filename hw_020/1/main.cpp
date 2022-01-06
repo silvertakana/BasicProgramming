@@ -18,14 +18,14 @@ struct Tnode
       if (right)total += right->countNodes(k);
       return total;
    }
-   int oddSum() const 
+   int oddSum() const
    {
-      int total = (key % 2 != 0) ? 1 : 0;
+      int total = (key % 2 != 0) ? key : 0;
       if (left)total += left->oddSum();
       if (right)total += right->oddSum();
       return total;
    }
-   int evenMax() const 
+   int evenMax() const
    {
       int max = (key % 2 == 0) ? key : INT_MIN;
       if (left)
@@ -42,19 +42,19 @@ struct Tnode
       }
       return max;
    }
-   bool isLeft(const int& k) const 
+   bool isLeft(const int& k) const
    {
       bool isSmaller = key < k;
       if (left && !left->isLeft(k)) isSmaller = false;
       if (right && !right->isLeft(k)) isSmaller = false;
       return isSmaller;
    }
-   size_t depth() const 
+   size_t depth() const
    {
       int d = 1;
       if (left)
       {
-         int leftDepth = left->depth()+1;
+         int leftDepth = left->depth() + 1;
          if (leftDepth > d)
             d = leftDepth;
       }
@@ -67,9 +67,10 @@ struct Tnode
       return d;
    }
    bool isBST()const
-   {
+   { 
+      const auto getDepth = [](Tnode* node) { return node ? node->depth() : 0; };
       if (!left && right || !right && left) return false;
-      else return abs((long)(left->depth() - right->depth())) <= 1;
+      else return abs((long)getDepth(left) - (long)getDepth(right)) <= 1;
    }
    ~Tnode()
    {
@@ -114,15 +115,15 @@ int main()
    {
       Tnode* root2 = new Tnode{ 1 };
       {
-      root2->left = new Tnode{ 2 };
-      {
-         root2->left->left = new Tnode{ 4 };
-         root2->left->right = new Tnode{ 5 };
+         root2->left = new Tnode{ 2 };
          {
-            root2->left->right->left = new Tnode{ 6 };
+            root2->left->left = new Tnode{ 4 };
+            root2->left->right = new Tnode{ 5 };
+            {
+               root2->left->right->left = new Tnode{ 6 };
+            }
          }
-      }
-      //root2->right = new Tnode{ 3 };
+         //root2->right = new Tnode{ 3 };
       }
       std::cout << root2->depth() << std::endl;
       std::cout << root2->isBST() << std::endl;
