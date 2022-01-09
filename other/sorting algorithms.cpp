@@ -38,7 +38,7 @@ void bubbleSort(T arr[], size_t size, bool(*key)(const T&, const T&))
 		std::cout << std::endl;
 	}
 }
-template	<class T>
+template<class T>
 void selectionSort(T arr[], size_t size, bool(*key)(const T&, const T&))
 {
 	for (size_t i = 0; i < size-1; i++)

@@ -1,7 +1,6 @@
 .vscode
 compiler.cpp
-compiler.exe
 generator.cpp
-generator.exe
+.exe
 baseCode/
 hw4/build/

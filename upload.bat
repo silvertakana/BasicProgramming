@@ -1,5 +1,5 @@
 set /p commitMessage=Commit message:
-
-git add *
-git commit -m %commitMessage%
-git push
+git add .
+git commit -m "%commitMessage%"
+git push 
+pause
