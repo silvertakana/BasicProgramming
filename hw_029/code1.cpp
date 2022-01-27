@@ -1,46 +1,18 @@
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 struct TreeNode
 {
-	int key;
-	TreeNode* left = nullptr, * right = nullptr;
+    int info;
+    TreeNode* left;
+    TreeNode* right;
 	int height = 0;
-	void printInorder()
-	{
-		if (left) left->printInorder();
-		printf("%i ", key);
-		if (right) right->printInorder();
-	}
-	void printMirrorInorder()
-	{
-		if (right) right->printInorder();
-		printf("%i ", key);
-		if (left) left->printInorder();
-	}
-	bool search(const int& target)
-	{
-		if (target > key && right)
-		{
-			return right->search(target);
-		}
-		else if (target < key && left)
-		{
-			return left->search(target);
-		}
-		else if (target == key) return true;
-		else					return false;
-	}
-	TreeNode* findMin()
-	{
-		if (left) return left->findMin();
-		else return this;
-	}
-	TreeNode* findMax()
-	{
-		if (right) return right->findMax();
-		else return this;
-	}
+    bool isAVL()
+    {
+		auto getHeight = [](TreeNode* node) { return node ? node->height : -1; };
+
+		return abs(getHeight(left) - getHeight(right)) <= 1;
+    }
 	TreeNode* rightRotate()
 	{
 		auto getHeight = [](TreeNode* node) { return node ? node->height : -1; };
@@ -84,7 +56,7 @@ struct TreeNode
 		{
 			return rightRotate();
 		}
-		
+
 		else if (heightDiff > 1 and getBalance(left) < 0)
 		{
 			left = left->leftRotate();
@@ -103,62 +75,36 @@ struct TreeNode
 	}
 	TreeNode* insert(TreeNode* node)
 	{
-		if (node->key < key)
+		if (node->info < info)
 		{
 			if (left) left = left->insert(node);
 			else left = node;
 		}
-		else if (node->key > key)
+		else if (node->info > info)
 		{
 			if (right) right = right->insert(node);
 			else right = node;
 		}
-		
-		return makeBalance();
+		height++;
+		return this;
 	}
-	TreeNode* insert(const int& newKey)
+	TreeNode* insert(const int& newinfo)
 	{
-		return insert( new TreeNode{ newKey } );
+		return insert(new TreeNode { newinfo });
 	}
-
 };
-TreeNode* del(TreeNode* T, float x)
-{
-	TreeNode* tmp;
-	if (T == nullptr) printf("not found");
-	else if (x < T->key) T->left = T->left? del(T->left, x) : nullptr;
-	else if (x > T->key) T->right = T->right ? del(T->right, x) : nullptr;
-	else 
-		if (T->left && T->right)
-		{
-			tmp = T->right->findMin();
-			T->key = tmp->key;
-			T->right = del(T->right, T->key);
-		}
-		else
-		{
-			tmp = T;
-			if (T->left == nullptr)
-				T = T->right;
-			else 
-				T = T->left;
-			free(tmp);
-		}
 
-	return T? T->makeBalance() : nullptr;
-}
 int main()
 {
-	int test[] = { 1,8,3,6,5,4,7,2,0,-5,-10 };
+    int test[] = { 1,8,3,6,5,4,7,2,0,-5,-10,11 };
 
-	TreeNode* tree = new TreeNode { test[0] };
+    TreeNode* tree = new TreeNode{ test[0] };
 
-	for (size_t i = 1;i < sizeof(test)/sizeof(int);i++)
-	{
-		tree = tree->insert(test[i]);
-	}
-	tree->printInorder();
-	tree = del(tree, -5);
-	printf("\n");
-	tree->printInorder();
+    for (size_t i = 1; i < sizeof(test) / sizeof(int); i++)
+    {
+        tree->insert(test[i]);
+    }
+	std::cout << std::boolalpha << tree->isAVL() << std::endl;
+	tree = tree->makeBalance();
+	std::cout << std::boolalpha << tree->isAVL() << std::endl;
 }

@@ -1,1 +1,0 @@
-    qsort(arr, sizeof(arr)/sizeof(int), sizeof(int), compare);
