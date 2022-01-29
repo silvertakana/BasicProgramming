@@ -3,16 +3,26 @@
 
 struct TreeNode
 {
-    int info;
-    TreeNode* left;
-    TreeNode* right;
+	int info;
+	TreeNode* left;
+	TreeNode* right;
 	int height = 0;
-    bool isAVL()
-    {
-		auto getHeight = [](TreeNode* node) { return node ? node->height : -1; };
-
-		return abs(getHeight(left) - getHeight(right)) <= 1;
-    }
+	size_t getHeight()
+	{
+		if (!this) return 0;
+		size_t h = 1;
+		if (left) h = left->getHeight() + 1;
+		if (right) h = std::max(right->getHeight() + 1, h);
+		return h;
+	}
+	bool isAVL()
+	{
+		if (left ? left->isAVL() : true && right ? right->isAVL() : true)
+			if (left ? left->info < info : true && right ? right->info > info : true)
+				if(std::abs((int)left->getHeight() - (int)right->getHeight()) <= 1 )
+					return true;
+		return false;
+	}
 	TreeNode* rightRotate()
 	{
 		auto getHeight = [](TreeNode* node) { return node ? node->height : -1; };
@@ -45,34 +55,6 @@ struct TreeNode
 		k1->height = std::max(getHeight(k1->left), getHeight(k1->right)) + 1;
 		return k1;
 	}
-	TreeNode* makeBalance()
-	{
-		auto getHeight = [](TreeNode* node) { return node ? node->height : -1; };
-		auto getBalance = [getHeight](TreeNode* node) { return std::max(getHeight(node->left), getHeight(node->right)) + 1; };
-		height = getBalance(this);
-		int heightDiff = getHeight(left) - getHeight(right);
-
-		if (heightDiff > 1 and getBalance(left) >= 0)
-		{
-			return rightRotate();
-		}
-
-		else if (heightDiff > 1 and getBalance(left) < 0)
-		{
-			left = left->leftRotate();
-			return rightRotate();
-		}
-		else if (heightDiff < -1 and getBalance(right) <= 0)
-		{
-			return leftRotate();
-		}
-		else if (heightDiff < -1 and getBalance(right) > 0)
-		{
-			right = right->rightRotate();
-			return leftRotate();
-		}
-		return this;
-	}
 	TreeNode* insert(TreeNode* node)
 	{
 		if (node->info < info)
@@ -92,19 +74,37 @@ struct TreeNode
 	{
 		return insert(new TreeNode { newinfo });
 	}
+	void printInorder()
+	{
+		if (left) left->printInorder();
+		printf("%i ", info);
+		if (right) right->printInorder();
+	}
 };
 
 int main()
 {
-    int test[] = { 1,8,3,6,5,4,7,2,0,-5,-10,11 };
+	{
+		int test[] = { 1,2,5,-1,3,4 };
 
-    TreeNode* tree = new TreeNode{ test[0] };
+		TreeNode* tree = new TreeNode { test[0] };
 
-    for (size_t i = 1; i < sizeof(test) / sizeof(int); i++)
-    {
-        tree->insert(test[i]);
-    }
-	std::cout << std::boolalpha << tree->isAVL() << std::endl;
-	tree = tree->makeBalance();
-	std::cout << std::boolalpha << tree->isAVL() << std::endl;
+		for (size_t i = 1; i < sizeof(test) / sizeof(int); i++)
+		{
+			tree->insert(test[i]);
+		}
+		std::cout << std::boolalpha << tree->isAVL() << std::endl;
+	}
+	{
+		int test[] = { 2,1,3,4,5,-1 };
+
+		TreeNode* tree = new TreeNode { test[0] };
+
+		for (size_t i = 1; i < sizeof(test) / sizeof(int); i++)
+		{
+			tree->insert(test[i]);
+		}
+
+		std::cout << std::boolalpha << tree->isAVL() << std::endl;
+	}
 }
