@@ -1,63 +1,73 @@
-	#include <string>
+#include <string>
 #include <iostream>
 #include <vector>
-
-std::vector<size_t> SearchStringNaive(const std::string &text, const std::string &findingText)
+#include <climits>
+#include <cmath>
+std::vector<size_t> SearchStringRabinKalp(const std::string &pattern, const std::string &txt)
 {
-	size_t i, j;
-	std::vector<size_t> allIndex;
-	for (i = 0; i < text.size(); i++)
+	std::vector<size_t> positions; // positions where pattern occurs in text
+	const size_t q = 11;		   // A prime number
+	const size_t base = 256;	   // Input alphabet base (256 in our case)
+	size_t m = pattern.size();	   // Size of pattern
+	size_t n = txt.size();		   // Size of text
+	size_t i, j;				   // Indices for for-loop
+	size_t p = 0;				   // Hash value of pattern
+	size_t t = 0;				   // Hash value of current window of text
+	size_t h = 1;				   // Hash value of pattern shifted by h
+
+	// The value of h would be same for a fixed pattern.
+	// h = pow(base, m-1) % q
+	for (i = 0; i < m - 1; i++)
+		h = (h * base) % q;
+
+	// Calculate the hash value of pattern and first window of text
+	for (i = 0; i < m; i++)
 	{
-		for (j = 0; j < findingText.size() && text[i + j] == findingText[j]; j++)
-			;
-		if (j >= findingText.size())
-			allIndex.push_back(i);
+		p = (base * p + pattern[i]) % q;
+		t = (base * t + txt[i]) % q;
 	}
-	return allIndex;
-}
 
-std::vector<size_t> SearchStringRabinKalp(const std::string &text, const std::string &findingText)
-{
-	size_t p = 0, m = findingText.size(), n = text.size();
-	for (size_t i = 0; i < m; i++)
-		p = (UCHAR_MAX + 1) * p + findingText[i];
-
-	std::cout << p << "\n";
-	std::vector<size_t> t;
-	size_t maxPow = std::pow(UCHAR_MAX + 1, m - 1);
-
-	t.push_back(0);
-	for (size_t i = 0; i < m; i++)
-		t[0] = (UCHAR_MAX + 1) * t[0] + text[i];
-	for (size_t s = 1; s <= n - m; s++)
+	// Slide the pattern over text one by one
+	for (i = 0; i <= n - m; i++)
 	{
-		t.push_back(0);
-		t[s] = (UCHAR_MAX + 1) * (t[s - 1] - maxPow * text[s - 1]) + text[s + m - 1];
-	}
-	std::vector<size_t> positions;
-	for (size_t i = 0; i < t.size(); i++)
-	{
-		if (p == t[i])
+		// Check the hash values of current window of text and pattern.
+		// If the hash values match then only check for characters on by one
+		if (p == t)
 		{
-			std::cout << t[i] << "\n";
-			positions.push_back(i);
+			/* Check for characters one by one */
+			for (j = 0; j < m; j++)
+			{
+				if (pattern[j] != txt[i + j])
+					break;
+			}
+
+			// if p == t and pat[0...m-1] = txt[i, i+1, ...i+m-1]
+			if (j == m)
+				positions.push_back(i); // record the current window position
+		}
+
+		// Calculate hash value for next window of text: Remove leading digit, add trailing digit
+		if (i < n - m)
+		{
+			t = (base * (t - txt[i] * h) + txt[i + m]) % q;
+
+			// We might get negative value of t, converting it to positive
+			if (t < 0)
+				t = (t + q);
 		}
 	}
+
 	return positions;
 }
 
 int main()
 {
-	std::string text = "Computer programming is the process of performing a particular computation, usually by designing/building an executable computer program. Programming involves tasks such as analysis, generating algorithms, profiling algorithms' accuracy and resource consumption, and the implementation of algorithms.";
-	std::string findingText = "programming";
-	auto allIndex = SearchStringRabinKalp(text, findingText);
-	for (size_t j = 0; j < allIndex.size(); j++)
+	std::string txt = "ABDCB";
+	std::string pattern = "DC";
+
+	std::vector<size_t> positions = SearchStringRabinKalp(pattern, txt);
+	for (auto &i : positions)
 	{
-		for (size_t i = 0; i < findingText.size(); i++)
-		{
-			std::cout << text[allIndex[j] + i];
-		}
-		std::cout << "\n"
-				  << allIndex[j] << "\n";
+		std::cout << i << "\t" << txt.substr(i, pattern.size()) << std::endl;
 	}
 }

@@ -2,58 +2,67 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
-std::unordered_map<size_t, size_t> ComputePrefix(const std::string &P)
+std::vector<size_t> preComputeLPS(const std::string &pat)
 {
-	const auto m = P.size();
-	std::unordered_map<size_t, size_t> mapValue;
-	size_t k = 0;
-	mapValue[0] = 0;
-	for (size_t q = 1; q < m; q++)
+	std::vector<size_t> LPS; // length of longest prefix suffix
+	LPS.resize(pat.size());	 // size of LPS array must be equal to size of pattern
+	size_t len = 0;			 // length of the previous longest prefix suffix
+	LPS[0] = 0;				 // no proper prefix or suffix possible for a single character string
+	for (size_t i = 1; i < pat.size(); ++i)
 	{
-		while (k > 0 and P[k + 1] != P[q])
-			k = mapValue[k];
-
-		if (P[k + 1] == P[q])
-			k++;
-		mapValue[q] = k;
-	}
-	return mapValue;
-}
-std::vector<size_t> KMP_Matcher(const std::string &P, const std::string &T)
-{
-	std::vector<size_t> positions;
-	const auto m = P.size(), n = T.size();
-
-	const std::unordered_map<size_t, size_t> mapValue = ComputePrefix(P);
-	size_t q = -1;
-
-	for (size_t i = 0; i < n; i++)
-	{
-		while (q > -1 and P[q + 1] != T[i])
-			q = mapValue.at(q);
-
-		if (P[q + 1] == T[i])
-			q++;
-		if (q == m - 1)
+		if (pat[i] == pat[len])
 		{
-			positions.emplace_back(i);
-			q = mapValue.at(q);
+			LPS[i] = ++len;
+		}
+		else
+		{
+			if (len != 0)
+			{
+				len = LPS[len - 1];
+				--i;
+			}
+		}
+	}
+	return LPS;
+}
+std::vector<size_t> KMPSearch(const std::string &pat, const std::string &txt)
+{
+	std::vector<size_t> positions; // all positions of matching pattern in txt
+	size_t m = pat.size(); // size of pattern
+	size_t n = txt.size(); // size of text
+
+	std::vector<size_t> LPS = preComputeLPS(pat); // precompute the length of longest prefix suffix
+
+	size_t i = 0; // index for T[]
+	size_t j = 0; // index for P[]
+	while (i < n)
+	{
+		if (pat[j] == txt[i])
+		{
+			++i;
+			++j;
+		}
+		if (j == m)
+		{
+			positions.push_back(i - j);
+			j = LPS[j - 1];
+		}
+		else if (i < n && pat[j] != txt[i])
+		{
+			if (j != 0)
+				j = LPS[j - 1];
+			else
+				++i;
 		}
 	}
 	return positions;
 }
 int main()
 {
-	std::string text = "abababaca";
-	std::string findingText = "aba";
-	auto allIndex = KMP_Matcher(findingText, text);
-	for (size_t j = 0; j < allIndex.size(); j++)
-	{
-		for (size_t i = 0; i < findingText.size(); i++)
-		{
-			std::cout << text[allIndex[j] + i];
-		}
-		std::cout << "\n"
-				  << allIndex[j] << "\n";
-	}
+	std::string txt = "Computer programming is the process of performing a particular computation, usually by designing/building an executable computer program. Programming involves tasks such as analysis, generating algorithms, profiling algorithms' accuracy and resource consumption, and the implementation of algorithms.";
+	std::string pattern = "rogr";
+
+	std::vector<size_t> positions = KMPSearch(pattern, txt);
+	for (size_t i = 0; i < positions.size(); ++i)
+		std::cout << positions[i] << "\t" << txt.substr(positions[i], pattern.size()) << '\n';
 }
