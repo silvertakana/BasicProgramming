@@ -24,16 +24,15 @@ int main(){
 		std::cout << array[i] << " ";
 	}
 	std::cout << "\nresult: " << std::endl;
+	int multiple = 1;
 	for (size_t i = 0; i < arraySize; i++)
 	{
-		int result = 1;
-		for (size_t j = 0; j < arraySize; j++)
-		{
-			if (i != j)
-			{
-				result *= array[j];
-			}
-		}
+		multiple = multiple * array[i];
+	}
+	for (size_t j = 0; j < arraySize; j++)
+	{
+		int result = multiple;
+		result /= array[j];
 		std::cout << result << " ";
 	}
 }

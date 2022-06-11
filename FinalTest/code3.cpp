@@ -1,62 +1,134 @@
 #include <string>
 #include <iostream>
-#include <string_view>
-bool isSingleNumber(std::string_view equation)
+#include <stack>
+
+char getOperator(char c)
 {
-	return !equation.contains('(') &&
-		!equation.contains(')') &&
-		equation.find('+', (int)(equation[0] == '+')) == -1 &&
-		equation.find('-', (int)(equation[0] == '-')) == -1;
+	if(c == '+' || c == '-' || c == '(' || c == ')')
+		return c;
+	if (c == ' ')
+		return 1;
+	return 0;
 }
-int calFromString(std::string_view equation)
+std::string infixToPostfix(std::string equation)
 {
-	if(isSingleNumber(equation))
-		return std::stoi((std::string)equation);
-	std::string num1, num2;
-	int start = equation[0] == '-';
-	int operatorIndex = std::min(equation.find_first_of('+', start), equation.find_first_of('-', start));
-	int end = std::min(equation.find_first_of('+', operatorIndex+1), equation.find_first_of('-', operatorIndex+1));
-	if (end == -1) end = equation.size();
-	num1 = equation.substr(0, operatorIndex);
-	num2 = equation.substr(operatorIndex, end - operatorIndex);
-	return calFromString(std::to_string(std::stoi(num1) + std::stoi(num2)) + (std::string)equation.substr(end, equation.size()-end));
-}
-std::string SolveEquation(std::string equation)
-{
-	int openBracketIndex = equation.find_last_of('(');
-	int closeBracketIndex;
-	if (openBracketIndex == -1)
+	//remove space for easier parsing
+	for (int i = 0; i < equation.length(); i++)
 	{
-		openBracketIndex = -1;
-		closeBracketIndex = equation.size();
-	}
-	else
-	{
-		closeBracketIndex = equation.find_first_of(')', openBracketIndex+1);
-	}
-	std::string_view subEquation(equation.begin() + (openBracketIndex +1), equation.begin() + (closeBracketIndex));
-	std::cout << subEquation << std::endl;
-	std::string insertString = std::to_string(calFromString(subEquation));
-	equation.insert(std::max(openBracketIndex,0), insertString);
-	equation.erase(equation.begin() + (std::max(openBracketIndex, 0) + insertString.size()), equation.begin() + (std::min(closeBracketIndex + 1 + insertString.size(), equation.size())));
-	int index = 0;
-	do
-	{
-		index = equation.find_first_of('-', index+1);
-		if (index != -1 && equation[index+1] == '-')
+		if (equation[i] == ' ')
 		{
-			equation.erase(index, 2);
-			equation.insert(equation.begin() + index, '+');
+			equation.erase(i, 1);
+			i--;
 		}
 	}
-	while(index != -1);
-	if(isSingleNumber(equation))
-		return equation;
-	return SolveEquation(equation);
+	std::string postfix;
+	std::stack<char> stack;
+	for(char c : equation)
+	{
+		if(getOperator(c))
+		{
+			if(stack.empty())
+				stack.push(c);
+			else
+			{
+				if(c == '(')
+					stack.push(c);
+				else if(c == ')')
+				{
+					while(stack.top() != '(')
+					{
+						postfix += stack.top();
+						postfix += ' ';
+						stack.pop();
+					}
+					stack.pop();
+				}
+				else
+				{
+					while(!stack.empty() && stack.top() != '(' && getOperator(stack.top()) && getOperator(c) && getOperator(stack.top()) <= getOperator(c))
+					{
+						postfix += stack.top();
+						postfix += ' ';
+						stack.pop();
+					}
+					stack.push(c);
+				}
+			}
+		}
+		else
+		{
+			postfix += c;
+			postfix += ' ';
+		}
+	}
+	while(!stack.empty())
+	{
+		postfix += stack.top();
+		postfix += ' ';
+		stack.pop();
+	}
+	return postfix;
+}
+int solve(std::string pfequa)
+{
+	std::stack<int> operandStack;
+	std::string operand;
+	for (size_t i = 0; i < pfequa.size(); i++)
+	{
+		if (!getOperator(pfequa[i]))
+		{
+			operand += pfequa[i];
+		}
+		else
+		{
+			if (operand.size() > 0)
+			{
+				operandStack.push(std::stoi(operand));
+				operand.clear();
+			}
+			int a, b;
+			a = b = 0;
+			if (pfequa[i] == '+' || pfequa[i] == '-')
+			{
+				if (!operandStack.empty())
+				{
+					b = operandStack.top();
+					operandStack.pop();
+				}
+				
+				if (!operandStack.empty())
+				{
+					a = operandStack.top();
+					operandStack.pop();
+				}
+			}
+			switch (pfequa[i])
+			{
+			case '+':
+				{
+					operandStack.push(a + b);
+				}
+				break;
+			case '-':
+				{
+					operandStack.push(a - b);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	return operandStack.top();
 }
 
 int main()
 {
-	std::string equation = "-(3+(2-1))";
-	std::cout << SolveEquation(equation);
+	std::string equation = "";
+	std::cout << "Enter equation: " << equation;
+	std::getline(std::cin, equation);
+	
+	int result = solve(infixToPostfix(equation));
+	std::cout << "\nResult: " << result << std::endl;
+	system("pause");
 }
